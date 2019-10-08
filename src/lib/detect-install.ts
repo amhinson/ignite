@@ -36,8 +36,10 @@ export default function detectInstall(plugin: string, toolbox: IgniteToolbox): I
   let packageName = plugin
   let packageVersion = undefined
 
+  const isScoped = plugin.startsWith('@')
+
   // Check if referring to a path
-  if (['~', '.', '\\', '/'].includes(plugin[0])) {
+  if (['~', '.', '\\', '/'].includes(plugin[0]) && !isScoped) {
     // verify that the path exists and has a `package.json`
     const packagePath = filesystem.path(plugin, 'package.json')
     const packageExists = filesystem.exists(packagePath)
@@ -46,7 +48,7 @@ export default function detectInstall(plugin: string, toolbox: IgniteToolbox): I
     } else {
       throw new Error(`Couldn't find package at ${packagePath}. Check path and try again.`)
     }
-  } else {
+  } else if (!isScoped) {
     // extract the package name and (optionally) version
     let { name, scoped, version } = packageExtract(plugin)
     packageName = scoped ? name : prependIgnite(name)
